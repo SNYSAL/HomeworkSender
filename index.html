@@ -3,91 +3,64 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>แจ้งการบ้าน</title>
+<title>ระบบแจ้งเตือนการบ้าน</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun&display=swap" rel="stylesheet">
 <style>
     body {
         font-family: 'Sarabun', sans-serif;
-        background: #f9f9f9;
+        background: #f5f5f5;
         margin: 0;
         padding: 0;
-        display: flex;
-        justify-content: center;
     }
-    .container {
-        max-width: 600px;
-        width: 100%;
-        padding: 20px;
-    }
-    h1 {
-        text-align: center;
-        color: #333;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        background: white;
-        box-shadow: 0 0 8px rgba(0,0,0,0.1);
-    }
-    th, td {
-        padding: 12px;
-        border-bottom: 1px solid #ddd;
-        text-align: left;
-    }
-    th {
+    header {
         background: #4CAF50;
         color: white;
+        padding: 15px;
+        text-align: center;
+        font-size: 1.5rem;
+    }
+    main {
+        max-width: 600px;
+        margin: 20px auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    input, button {
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 1rem;
     }
     button {
         background: #4CAF50;
         color: white;
-        border: none;
-        padding: 8px 14px;
-        border-radius: 6px;
         cursor: pointer;
     }
     button:hover {
         background: #45a049;
     }
-    .manual-form {
-        background: white;
-        padding: 15px;
-        margin-top: 20px;
-        box-shadow: 0 0 8px rgba(0,0,0,0.1);
-    }
-    input {
-        width: 100%;
-        padding: 10px;
-        margin: 6px 0;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-    }
 </style>
 </head>
 <body>
-<div class="container">
-    <h1>📚 แจ้งการบ้าน</h1>
-    <table id="hwTable">
-        <thead>
-            <tr>
-                <th>วิชา</th>
-                <th>รายละเอียด</th>
-                <th>ส่ง LINE</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
 
-    <div class="manual-form">
-        <h3>➕ เพิ่มการบ้านเอง</h3>
-        <input type="text" id="manualSubject" placeholder="ชื่อวิชา">
-        <input type="text" id="manualDetail" placeholder="รายละเอียดงาน">
-        <button onclick="sendLineMessage(
-            document.getElementById('manualSubject').value,
-            document.getElementById('manualDetail').value
-        )">ส่ง LINE</button>
-    </div>
-</div>
+<header>📢 ระบบแจ้งเตือนการบ้าน</header>
+
+<main>
+    <h3>แจ้งเตือนจาก Google Sheets</h3>
+    <button onclick="fetchHomework()">ดึงข้อมูลล่าสุด</button>
+    <div id="sheetData"></div>
+
+    <hr>
+
+    <h3>ส่งข้อความเอง (Manual)</h3>
+    <input type="text" id="subject" placeholder="ชื่อวิชา">
+    <input type="text" id="details" placeholder="รายละเอียด">
+    <button onclick="sendManual()">ส่งแจ้งเตือน</button>
+</main>
 
 <script>
 const sheetID = "1dObKpOKvBAOVr4B4aTWTbyoo8ElnHJqKKi4dGWiaDqk";
@@ -95,36 +68,42 @@ const sheetName = "HW";
 const lineToken = "JUb7lM66V8CX1w2W/Wz+WbVOB6hLDurq8jY0jEHUuKGr4VwTOokhMGovEaYGDZUWUbIh5V7JptooJCyAkvEaUWEVUIm8asW8EzmhCdAqfmtqTUbibh4/uSXtbUVPbiC524EVWHm+6mXQirsAYejM8wdB04t89/1O/w1cDnyilFU=";
 const lineGroup = "C818f3af969e10d8eeb8e13ef08647a2f";
 
-// ดึงข้อมูลจาก Google Sheets
-fetch(`https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json&sheet=${sheetName}`)
-    .then(res => res.text())
-    .then(data => {
-        let json = JSON.parse(data.substr(47).slice(0, -2));
-        let rows = json.table.rows;
-        let tbody = document.querySelector("#hwTable tbody");
-        rows.forEach(row => {
-            let subject = row.c[0]?.v || "";
-            let detail = row.c[1]?.v || "";
-            let tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${subject}</td>
-                <td>${detail}</td>
-                <td><button onclick="sendLineMessage('${subject}','${detail}')">ส่ง</button></td>
-            `;
-            tbody.appendChild(tr);
+function fetchHomework() {
+    fetch(`https://opensheet.elk.sh/${sheetID}/${sheetName}`)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("sheetData").innerHTML = "";
+            data.forEach(row => {
+                sendLineMessage(row.วิชา, row.รายละเอียด);
+            });
+        })
+        .catch(err => {
+            console.error("Error fetching sheet:", err);
         });
-    });
+}
 
-// ส่งข้อความไป LINE
-function sendLineMessage(subject, detail) {
-    if (!subject || !detail) {
+function sendManual() {
+    const subject = document.getElementById("subject").value;
+    const details = document.getElementById("details").value;
+    if (subject && details) {
+        sendLineMessage(subject, details);
+    } else {
         alert("กรุณากรอกข้อมูลให้ครบ");
-        return;
     }
+}
 
-    const message = `ใกล้จะถึงวันที่ต้องส่งของวิชา ${subject} งาน ${detail} แล้วนะ`;
+function sendLineMessage(subject, details) {
+    const randomMessages = [
+        "รีบทำก่อนเดี๋ยวไม่ทันนะ 🏃‍♂️",
+        "ยังทันอยู่ถ้าลงมือเดี๋ยวนี้ ✏️",
+        "อย่าลืมทำงานนะ 😆",
+        "เดี๋ยวงานเข้า รีบหน่อยนะ 🏃‍♂️",
+        "ทำเสร็จแล้วค่อยไปเล่นเกม 🎮"
+    ];
+    const randomText = randomMessages[Math.floor(Math.random() * randomMessages.length)];
+    const message = `🚨ใกล้ถึงวันที่ต้องส่งแล้วนะ\nวิชา : ${subject}\nรายละเอียด : ${details}\n${randomText}`;
 
-    fetch("https://corsproxy.io/?" + encodeURIComponent("https://api.line.me/v2/bot/message/push"), {
+    fetch("https://corsproxy.io/?https://api.line.me/v2/bot/message/push", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -135,15 +114,11 @@ function sendLineMessage(subject, detail) {
             messages: [{ type: "text", text: message }]
         })
     })
-    .then(res => {
-        if (res.ok) {
-            alert("ส่งข้อความไป LINE แล้ว");
-        } else {
-            alert("ส่งไม่สำเร็จ");
-        }
-    })
-    .catch(err => alert("Error: " + err));
+    .then(res => res.json())
+    .then(data => console.log("LINE API Response:", data))
+    .catch(err => console.error("Error sending message:", err));
 }
 </script>
+
 </body>
 </html>
