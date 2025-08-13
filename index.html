@@ -3,104 +3,132 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>แจ้งการบ้าน</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun&display=swap" rel="stylesheet">
+<title>📚 แจ้งการบ้าน</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-body { font-family:'Sarabun', sans-serif; background:#f5f7fa; margin:0; padding:20px; }
-h1 { text-align:center; color:#333; }
-.container { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px,1fr)); gap:15px; margin-top:20px; }
-.card { background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,0.1); }
-.card h2 { font-size:1.2em; margin-bottom:10px; color:#0077cc; }
-.card p { margin:5px 0; color:#444; }
-.send-btn { margin-top:10px; background:#28a745; color:white; padding:8px 12px; border:none; border-radius:6px; cursor:pointer; }
-.send-btn:hover { background:#218838; }
-.manual { margin-top:30px; background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,0.1); display:flex; flex-direction:column; align-items:center; }
-.manual input { width:90%; padding:10px; margin:8px 0; border:1px solid #ccc; border-radius:5px; font-size:1rem; }
-.manual button { width:90%; padding:10px; margin-top:10px; background:#007bff; color:white; border:none; border-radius:5px; cursor:pointer; }
-.manual button:hover { background:#0069d9; }
+    body { font-family: 'Sarabun', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; color: #333; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    h1 { text-align: center; color: #2c3e50; font-weight: 700; margin-bottom: 40px; }
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    .card { background: #ffffff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); transition: transform 0.2s ease, box-shadow 0.2s ease; display: flex; flex-direction: column; }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); }
+    .card h2 { font-size: 1.3em; margin-bottom: 10px; color: #3498db; font-weight: 600; }
+    .card p { margin: 5px 0; color: #555; flex-grow: 1; }
+    .manual-input-section { margin-top: 40px; background: #ffffff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+    .manual-input-section h3 { font-size: 1.2em; color: #2c3e50; font-weight: 600; margin-bottom: 20px; }
+    .manual-input-section input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s ease, box-shadow 0.3s ease; box-sizing: border-box; }
+    .manual-input-section input:focus { border-color: #3498db; outline: none; box-shadow: 0 0 5px rgba(52, 152, 219, 0.5); }
+    .send-btn, .manual-btn { padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color 0.3s ease; text-align: center; margin-top: auto; }
+    .send-btn { background-color: #2ecc71; color: #fff; }
+    .send-btn:hover { background-color: #27ae60; }
+    .manual-btn { background-color: #3498db; color: #fff; }
+    .manual-btn:hover { background-color: #2980b9; }
 </style>
 </head>
 <body>
 
-<h1>📚 แจ้งการบ้าน</h1>
+<div class="container">
+    <h1>📚 แจ้งการบ้าน</h1>
+    <div class="cards-grid" id="homework-list"></div>
 
-<div class="container" id="homework-list"></div>
-
-<div class="manual">
-    <h3>➕ เพิ่มการบ้านเอง (ส่ง LINE อัตโนมัติ)</h3>
-    <input type="text" id="manual-subject" placeholder="ชื่อวิชา">
-    <input type="text" id="manual-detail" placeholder="รายละเอียด">
-    <button onclick="addManualHomework()">เพิ่ม & ส่ง LINE</button>
+    <div class="manual-input-section">
+        <h3>➕ เพิ่มการบ้านเอง (ส่ง LINE อัตโนมัติ)</h3>
+        <input type="text" id="manual-subject" placeholder="ชื่อวิชา">
+        <input type="text" id="manual-detail" placeholder="รายละเอียด">
+        <button id="add-manual-btn" class="manual-btn">เพิ่ม & ส่ง LINE อัตโนมัติ</button>
+    </div>
 </div>
 
 <script>
-const sheetId = "1dObKpOKvBAOVr4B4aTWTbyoo8ElnHJqKKi4dGWiaDqk";
-const sheetName = "HW";
-const apiUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
-const lineToken = "JUb7lM66V8CX1w2W/Wz+WbVOB6hLDurq8jY0jEHUuKGr4VwTOokhMGovEaYGDZUWUbIh5V7JptooJCyAkvEaUWEVUIm8asW8EzmhCdAqfmtqTUbibh4/uSXtbUVPbiC524EVWHm+6mXQirsAYejM8wdB04t89/1O/w1cDnyilFU=";
-const lineGroup = "C818f3af969e10d8eeb8e13ef08647a2f";
-const randomMessages = [
-    "✏️ รีบทำก่อนครูโกรธนะ!",
-    "📅 อย่าลืมทำล่ะ เดี๋ยวไม่ทัน",
-    "🔥 เหลือเวลาอีกนิดเดียว!",
-    "💪 สู้ ๆ นะเพื่อน!",
-    "📌 เช็คงานให้ครบก่อนส่งด้วย"
-];
+    const sheetId = "1dObKpOKvBAOVr4B4aTWTbyoo8ElnHJqKKi4dGWiaDqk";
+    const sheetName = "HW";
+    const apiUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+    const lineToken = "JUb7lM66V8CX1w2W/Wz+WbVOB6hLDurq8jY0jEHUuKGr4VwTOokhMGovEaYGDZUWUbIh5V7JptooJCyAkvEaUWEVUIm8asW8EzmhCdAqfmtqTUbibh4/uSXtbUVPbiC524EVWHm+6mXQirsAYejM8wdB04t89/1O/w1cDnyilFU=";
+    const lineGroup = "C818f3af969e10d8eeb8e13ef08647a2f";
+    const randomMessages = [
+        "✏️ รีบทำก่อนครูโกรธนะ!",
+        "📅 อย่าลืมทำล่ะ เดี๋ยวไม่ทัน",
+        "🔥 เหลือเวลาอีกนิดเดียว!",
+        "💪 สู้ ๆ นะเพื่อน!",
+        "📌 เช็คงานให้ครบก่อนส่งด้วย"
+    ];
 
-// ฟังก์ชันสร้างการ์ด
-function createCard(subject, detail, autoSend=false) {
-    const container = document.getElementById("homework-list");
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-        <h2>${subject}</h2>
-        <p>${detail}</p>
-        ${!autoSend ? '<button class="send-btn">ส่ง LINE</button>' : ''}
-    `;
-    if(!autoSend){
-        card.querySelector(".send-btn").addEventListener("click", ()=>sendLine(subject, detail));
-    } else {
-        sendLine(subject, detail);
+    const homeworkList = document.getElementById("homework-list");
+    const subjectInput = document.getElementById("manual-subject");
+    const detailInput = document.getElementById("manual-detail");
+    const addManualBtn = document.getElementById("add-manual-btn");
+
+    function createCard(subject, detail, isManual = false) {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+            <h2>${subject}</h2>
+            <p>${detail}</p>
+            <button class="send-btn">ส่ง LINE</button>
+        `;
+        const sendBtn = card.querySelector(".send-btn");
+        sendBtn.addEventListener("click", () => sendLine(subject, detail));
+        homeworkList.appendChild(card);
+
+        if (isManual) {
+            sendLine(subject, detail);
+        }
     }
-    container.appendChild(card);
-}
 
-// ส่ง LINE
-function sendLine(subject, detail){
-    const randomText = randomMessages[Math.floor(Math.random()*randomMessages.length)];
-    const message = `🚨ใกล้ถึงวันที่ต้องส่งแล้วนะ\nวิชา : ${subject}\nรายละเอียด : ${detail}\n${randomText}`;
-    fetch("https://corsproxy.io/?https://api.line.me/v2/bot/message/push", {
-        method:"POST",
-        headers:{ "Content-Type":"application/json", "Authorization": `Bearer ${lineToken}` },
-        body: JSON.stringify({ to: lineGroup, messages:[{ type:"text", text:message }] })
-    })
-    .then(res=>{ if(res.ok) alert("ส่ง LINE สำเร็จ ✅"); else alert("ส่งไม่สำเร็จ ❌"); })
-    .catch(err=>console.error(err));
-}
+    function sendLine(subject, detail) {
+        const randomText = randomMessages[Math.floor(Math.random() * randomMessages.length)];
+        const message = `🚨ใกล้ถึงวันที่ต้องส่งแล้วนะ\nวิชา : ${subject}\nรายละเอียด : ${detail}\n${randomText}`;
+        fetch("https://corsproxy.io/?https://api.line.me/v2/bot/message/push", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${lineToken}`
+            },
+            body: JSON.stringify({
+                to: lineGroup,
+                messages: [{
+                    type: "text",
+                    text: message
+                }]
+            })
+        })
+        .then(res => {
+            if (res.ok) alert("ส่ง LINE สำเร็จ ✅");
+            else alert("ส่งไม่สำเร็จ ❌");
+        })
+        .catch(err => console.error(err));
+    }
 
-// ดึงงานจาก Google Sheet
-fetch(apiUrl)
-    .then(res=>res.text())
-    .then(data=>{
-        const jsonData = JSON.parse(data.substr(47).slice(0,-2));
-        const rows = jsonData.table.rows;
-        rows.forEach(row=>{
-            const subject = row.c[0]?.v || "";
-            const detail = row.c[1]?.v || "";
-            createCard(subject, detail);
-        });
-    })
-    .catch(err=>console.error(err));
+    function loadHomework() {
+        fetch(apiUrl)
+            .then(res => res.text())
+            .then(data => {
+                const jsonData = JSON.parse(data.substr(47).slice(0, -2));
+                const rows = jsonData.table.rows;
+                homeworkList.innerHTML = "";
+                rows.forEach(row => {
+                    const subject = row.c[0]?.v || "ไม่ระบุวิชา";
+                    const detail = row.c[1]?.v || "ไม่มีรายละเอียด";
+                    createCard(subject, detail);
+                });
+            })
+            .catch(err => console.error(err));
+    }
 
-// เพิ่มงานเอง + ส่ง LINE ทันที
-function addManualHomework(){
-    const subject = document.getElementById("manual-subject").value.trim();
-    const detail = document.getElementById("manual-detail").value.trim();
-    if(!subject || !detail){ alert("กรุณากรอกข้อมูลให้ครบ"); return; }
-    createCard(subject, detail, true);
-    document.getElementById("manual-subject").value = "";
-    document.getElementById("manual-detail").value = "";
-}
+    function addManualHomework() {
+        const subject = subjectInput.value.trim();
+        const detail = detailInput.value.trim();
+        if (!subject || !detail) {
+            alert("กรุณากรอกข้อมูลให้ครบ");
+            return;
+        }
+        createCard(subject, detail, true);
+        subjectInput.value = "";
+        detailInput.value = "";
+    }
+
+    addManualBtn.addEventListener("click", addManualHomework);
+    document.addEventListener("DOMContentLoaded", loadHomework);
 </script>
 
 </body>
