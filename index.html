@@ -4,228 +4,146 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>แจ้งการบ้าน</title>
-
-<!-- โหลด Font Sarabun -->
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Sarabun&display=swap" rel="stylesheet">
 <style>
-  body {
-    font-family: 'Sarabun', sans-serif;
-    margin: 0;
-    padding: 0;
-    background: #f4f4f9;
-    color: #333;
-  }
-
-  header {
-    background-color: #4a76a8;
-    color: white;
-    text-align: center;
-    padding: 1rem 0;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  }
-
-  h1 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 700;
-  }
-
-  #homework-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 1rem;
-    gap: 1rem;
-  }
-
-  .card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    padding: 1rem;
-    width: 300px;
-    box-sizing: border-box;
-    transition: transform 0.2s;
-  }
-
-  .card:hover {
-    transform: translateY(-5px);
-  }
-
-  .card b {
-    font-size: 1.1rem;
-    font-weight: 600;
-  }
-
-  .card button {
-    margin-top: 0.5rem;
-    width: 100%;
-    padding: 0.5rem;
-    border: none;
-    border-radius: 8px;
-    background-color: #4a76a8;
-    color: white;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-
-  .card button:hover {
-    background-color: #3a5f87;
-  }
-
-  /* ฟอร์มเพิ่มการบ้าน */
-  #add-homework {
-    max-width: 400px;
-    margin: 1rem auto;
-    background: white;
-    padding: 1rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  }
-
-  #add-homework input, #add-homework button {
-    width: 100%;
-    padding: 0.5rem;
-    margin: 0.3rem 0;
-    box-sizing: border-box;
-    font-family: 'Sarabun', sans-serif;
-  }
-
-  #add-homework button {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-
-  #add-homework button:hover {
-    background-color: #1e7e34;
-  }
-
-  @media (max-width: 600px) {
-    #homework-list {
-      flex-direction: column;
-      align-items: center;
+    body {
+        font-family: 'Sarabun', sans-serif;
+        background: #f9f9f9;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
     }
-    .card {
-      width: 90%;
+    .container {
+        max-width: 600px;
+        width: 100%;
+        padding: 20px;
     }
-    #add-homework {
-      width: 90%;
+    h1 {
+        text-align: center;
+        color: #333;
     }
-  }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+    }
+    th {
+        background: #4CAF50;
+        color: white;
+    }
+    button {
+        background: #4CAF50;
+        color: white;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+    button:hover {
+        background: #45a049;
+    }
+    .manual-form {
+        background: white;
+        padding: 15px;
+        margin-top: 20px;
+        box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+    input {
+        width: 100%;
+        padding: 10px;
+        margin: 6px 0;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+    }
 </style>
 </head>
 <body>
+<div class="container">
+    <h1>📚 แจ้งการบ้าน</h1>
+    <table id="hwTable">
+        <thead>
+            <tr>
+                <th>วิชา</th>
+                <th>รายละเอียด</th>
+                <th>ส่ง LINE</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 
-<header>
-  <h1>รายการการบ้าน</h1>
-</header>
-
-<!-- ฟอร์มเพิ่มการบ้านเอง -->
-<div id="add-homework">
-  <h3>เพิ่มการบ้านเอง</h3>
-  <input type="text" id="new-subject" placeholder="ชื่อวิชา">
-  <input type="text" id="new-detail" placeholder="รายละเอียดงาน">
-  <input type="date" id="new-date">
-  <button onclick="addHomework()">เพิ่มและส่ง LINE</button>
+    <div class="manual-form">
+        <h3>➕ เพิ่มการบ้านเอง</h3>
+        <input type="text" id="manualSubject" placeholder="ชื่อวิชา">
+        <input type="text" id="manualDetail" placeholder="รายละเอียดงาน">
+        <button onclick="sendLineMessage(
+            document.getElementById('manualSubject').value,
+            document.getElementById('manualDetail').value
+        )">ส่ง LINE</button>
+    </div>
 </div>
 
-<div id="homework-list"></div>
-
 <script>
-// === ตั้งค่า LINE Bot ===
-const LINE_TOKEN = "JUb7lM66V8CX1w2W/Wz+WbVOB6hLDurq8jY0jEHUuKGr4VwTOokhMGovEaYGDZUWUbIh5V7JptooJCyAkvEaUWEVUIm8asW8EzmhCdAqfmtqTUbibh4/uSXtbUVPbiC524EVWHm+6mXQirsAYejM8wdB04t89/1O/w1cDnyilFU=";
-const LINE_TO = "C818f3af969e10d8eeb8e13ef08647a2f";
+const sheetID = "1dObKpOKvBAOVr4B4aTWTbyoo8ElnHJqKKi4dGWiaDqk";
+const sheetName = "HW";
+const lineToken = "JUb7lM66V8CX1w2W/Wz+WbVOB6hLDurq8jY0jEHUuKGr4VwTOokhMGovEaYGDZUWUbIh5V7JptooJCyAkvEaUWEVUIm8asW8EzmhCdAqfmtqTUbibh4/uSXtbUVPbiC524EVWHm+6mXQirsAYejM8wdB04t89/1O/w1cDnyilFU=";
+const lineGroup = "C818f3af969e10d8eeb8e13ef08647a2f";
 
-// === Google Sheet ===
-const SHEET_ID = "1dObKpOKvBAOVr4B4aTWTbyoo8ElnHJqKKi4dGWiaDqk";
-const SHEET_NAME = "HW";
+// ดึงข้อมูลจาก Google Sheets
+fetch(`https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json&sheet=${sheetName}`)
+    .then(res => res.text())
+    .then(data => {
+        let json = JSON.parse(data.substr(47).slice(0, -2));
+        let rows = json.table.rows;
+        let tbody = document.querySelector("#hwTable tbody");
+        rows.forEach(row => {
+            let subject = row.c[0]?.v || "";
+            let detail = row.c[1]?.v || "";
+            let tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${subject}</td>
+                <td>${detail}</td>
+                <td><button onclick="sendLineMessage('${subject}','${detail}')">ส่ง</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    });
 
-// แฟลกเก็บการบ้านจากผู้ใช้
-let userHomework = [];
+// ส่งข้อความไป LINE
+function sendLineMessage(subject, detail) {
+    if (!subject || !detail) {
+        alert("กรุณากรอกข้อมูลให้ครบ");
+        return;
+    }
 
-// === ดึงข้อมูล Google Sheet ===
-async function loadHomework() {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
-  const res = await fetch(url);
-  const text = await res.text();
-  const jsonText = text.match(/google\.visualization\.Query\.setResponse\((.*)\);/)[1];
-  const data = JSON.parse(jsonText);
-  const rows = data.table.rows.map(r => ({
-    subject: r.c[0]?.v ?? "",
-    detail: r.c[1]?.v ?? "",
-    date: r.c[2]?.v ?? ""
-  }));
-  displayHomework(rows.concat(userHomework)); // รวมกับการบ้านผู้ใช้
-}
+    const message = `ใกล้จะถึงวันที่ต้องส่งของวิชา ${subject} งาน ${detail} แล้วนะ`;
 
-// === แสดงการบ้าน ===
-function displayHomework(homeworkData) {
-  const container = document.getElementById('homework-list');
-  container.innerHTML = '';
-  homeworkData.forEach(hw => {
-    const card = document.createElement('div');
-    card.className = "card";
-    card.innerHTML = `
-      <b>${hw.subject}</b> - ${hw.detail} <br>
-      ส่งวันที่: ${hw.date} <br>
-      <button onclick="sendLine('${hw.subject}','${hw.detail}')">ส่ง</button>
-    `;
-    container.appendChild(card);
-  });
-}
-
-// === ส่งข้อความ LINE ===
-function sendLine(subject, detail) {
-  fetch("https://api.line.me/v2/bot/message/push", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + LINE_TOKEN
-    },
-    body: JSON.stringify({
-      to: LINE_TO,
-      messages: [
-        { type: "text", text: `ใกล้จะถึงวันที่ต้องส่งวิชา ${subject} งาน ${detail} แล้วนะ` }
-      ]
+    fetch("https://corsproxy.io/?" + encodeURIComponent("https://api.line.me/v2/bot/message/push"), {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + lineToken
+        },
+        body: JSON.stringify({
+            to: lineGroup,
+            messages: [{ type: "text", text: message }]
+        })
     })
-  })
-  .then(res => {
-    if(res.ok) alert("ส่งข้อความไป LINE แล้ว!");
-    else alert("ส่งไม่สำเร็จ! ตรวจสอบ Token/ID");
-  })
-  .catch(err => alert("เกิดข้อผิดพลาด: " + err));
+    .then(res => {
+        if (res.ok) {
+            alert("ส่งข้อความไป LINE แล้ว");
+        } else {
+            alert("ส่งไม่สำเร็จ");
+        }
+    })
+    .catch(err => alert("Error: " + err));
 }
-
-// === ฟังก์ชันเพิ่มการบ้านเอง ===
-function addHomework() {
-  const subject = document.getElementById('new-subject').value.trim();
-  const detail = document.getElementById('new-detail').value.trim();
-  const date = document.getElementById('new-date').value;
-  
-  if(!subject || !detail || !date){
-    alert("กรอกข้อมูลให้ครบทุกช่อง!");
-    return;
-  }
-
-  const newHW = {subject, detail, date};
-  userHomework.push(newHW); // เก็บการบ้านผู้ใช้
-  displayHomework(userHomework.concat([])); // แสดงทันที
-  sendLine(subject, detail); // ส่ง LINE
-  // ล้างฟอร์ม
-  document.getElementById('new-subject').value = "";
-  document.getElementById('new-detail').value = "";
-  document.getElementById('new-date').value = "";
-}
-
-// โหลดการบ้านตอนเปิดเว็บ
-window.addEventListener('DOMContentLoaded', loadHomework);
 </script>
-
 </body>
 </html>
