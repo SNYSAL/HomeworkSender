@@ -78,7 +78,7 @@
     function sendLine(subject, detail) {
         const randomText = randomMessages[Math.floor(Math.random() * randomMessages.length)];
         const message = `🚨ใกล้ถึงวันที่ต้องส่งแล้วนะ\nวิชา : ${subject}\nรายละเอียด : ${detail}\n${randomText}`;
-        fetch("https://corsproxy.io/?https://api.line.me/v2/bot/message/push", {
+        fetch("https://crossorigin.me/https://api.line.me/v2/bot/message/push", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
